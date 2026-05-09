@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WalletLog</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<!-- AUTH (visible while logged out) -->
+<section id="auth-root" class="auth-shell">
+  <div class="auth-card">
+    <h1 class="auth-brand">WalletLog</h1>
+
+    <div class="auth-tabs" role="tablist">
+      <button class="auth-tab active" id="tab-login"    role="tab" aria-selected="true">Login</button>
+      <button class="auth-tab"        id="tab-register" role="tab" aria-selected="false">Register</button>
+    </div>
+
+    <!-- Login form -->
+    <form id="login-form" class="auth-form" novalidate>
+      <div class="field">
+        <label for="login-email">Email <span class="req">*</span></label>
+        <input type="email" id="login-email" autocomplete="email" />
+        <small class="error" data-error-for="login-email"></small>
+      </div>
+      <div class="field">
+        <label for="login-password">Password <span class="req">*</span></label>
+        <input type="password" id="login-password" autocomplete="current-password" />
+        <small class="error" data-error-for="login-password"></small>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" id="login-submit">Sign in</button>
+      </div>
+    </form>
+
+    <!-- Register form (hidden by default) -->
+    <form id="register-form" class="auth-form hidden" novalidate>
+      <div class="field">
+        <label for="reg-display">Display name</label>
+        <input type="text" id="reg-display" maxlength="80" placeholder="Optional" autocomplete="nickname" />
+        <small class="error" data-error-for="reg-display"></small>
+      </div>
+      <div class="field">
+        <label for="reg-email">Email <span class="req">*</span></label>
+        <input type="email" id="reg-email" autocomplete="email" />
+        <small class="error" data-error-for="reg-email"></small>
+      </div>
+      <div class="field">
+        <label for="reg-password">Password <span class="req">*</span></label>
+        <input type="password" id="reg-password" autocomplete="new-password"
+               placeholder="Min 8 chars, include a letter and a digit" />
+        <small class="error" data-error-for="reg-password"></small>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" id="register-submit">Create account</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- APP (visible after login) -->
+<div id="app-root" class="hidden">
+  <header class="topbar">
+    <span class="brand">WalletLog</span>
+    <span class="who" id="who"></span>
+    <button class="btn btn-ghost" id="logout-btn">Logout</button>
+  </header>
+
+  <nav>
+    <button data-page="dashboard">Dashboard</button>
+    <button data-page="transactions">Transactions</button>
+    <button data-page="categories">Categories</button>
+    <button data-page="budgets">Budgets</button>
+  </nav>
+
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="page active">
+    <h2>Monthly Summary</h2>
+    <div class="card">
+      <div class="filters">
+        <label>Month
+          <select id="sum-month"></select>
+        </label>
+        <label>Year
+          <input type="number" id="sum-year" min="1900" max="2999" />
+        </label>
+        <button class="btn btn-primary" id="btn-load-summary">Show</button>
+      </div>
+      <div class="summary-grid">
+        <div class="summary-card income-bg"><h3>Income</h3>  <p id="sum-income"  class="income">-</p></div>
+        <div class="summary-card expense-bg"><h3>Expense</h3><p id="sum-expense" class="expense">-</p></div>
+        <div class="summary-card neutral-bg"><h3>Balance</h3><p id="sum-balance">-</p></div>
+      </div>
+    </div>
+    <h2>Budget Status</h2>
+    <div id="budget-status-list"></div>
+  </section>
+
+  <!-- TRANSACTIONS -->
+  <section id="transactions" class="page">
+    <h2>Transactions</h2>
+
+    <div class="card">
+      <h3 id="t-form-title">Add Transaction</h3>
+      <form id="t-form" novalidate>
+        <input type="hidden" id="t-id" />
+
+        <div class="field">
+          <label for="t-title">Title <span class="req">*</span></label>
+          <input type="text" id="t-title" maxlength="200" placeholder="e.g. Grocery shopping" />
+          <small class="error" data-error-for="t-title"></small>
+        </div>
+
+        <div class="field">
+          <label for="t-amount">Amount <span class="req">*</span></label>
+          <input type="number" id="t-amount" min="0.01" step="0.01" placeholder="0.00" />
+          <small class="error" data-error-for="t-amount"></small>
+        </div>
+
+        <div class="field">
+          <label for="t-type">Type <span class="req">*</span></label>
+          <select id="t-type">
+            <option value="expense">Expense</option>
+            <option value="income">Income</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="t-category">Category</label>
+          <select id="t-category"></select>
+        </div>
+
+        <div class="field">
+          <label for="t-date">Date <span class="req">*</span></label>
+          <input type="date" id="t-date" />
+          <small class="error" data-error-for="t-date"></small>
+        </div>
+
+        <div class="field">
+          <label for="t-note">Note</label>
+          <textarea id="t-note" rows="2" placeholder="Optional"></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="t-submit">Save</button>
+          <button type="button" class="btn btn-ghost hidden" id="t-cancel">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3>Filter</h3>
+      <div class="filters">
+        <label>Type
+          <select id="f-type">
+            <option value="">All</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+        </label>
+        <label>Category
+          <select id="f-cat"></select>
+        </label>
+        <label>From <input type="date" id="f-start" /></label>
+        <label>To   <input type="date" id="f-end"   /></label>
+        <button class="btn btn-ghost" id="f-clear">Clear</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th><th>Title</th><th>Category</th><th>Type</th><th>Amount</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="transaction-list"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- CATEGORIES -->
+  <section id="categories" class="page">
+    <h2>Categories</h2>
+
+    <div class="card">
+      <h3 id="c-form-title">Add Category</h3>
+      <form id="c-form" novalidate>
+        <input type="hidden" id="c-id" />
+
+        <div class="field">
+          <label for="c-name">Name <span class="req">*</span></label>
+          <input type="text" id="c-name" maxlength="100" placeholder="Category name" />
+          <small class="error" data-error-for="c-name"></small>
+        </div>
+
+        <div class="field">
+          <label for="c-color">Color</label>
+          <input type="color" id="c-color" value="#3498db" />
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="c-submit">Save</button>
+          <button type="button" class="btn btn-ghost hidden" id="c-cancel">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr><th>Color</th><th>Name</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="category-list"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- BUDGETS -->
+  <section id="budgets" class="page">
+    <h2>Budget Goals</h2>
+
+    <div class="card">
+      <h3 id="b-form-title">Add Budget</h3>
+      <form id="b-form" novalidate>
+        <input type="hidden" id="b-id" />
+
+        <div class="field">
+          <label for="b-category">Category <span class="req">*</span></label>
+          <select id="b-category"></select>
+          <small class="error" data-error-for="b-category"></small>
+        </div>
+
+        <div class="field">
+          <label for="b-month">Month <span class="req">*</span></label>
+          <select id="b-month"></select>
+        </div>
+
+        <div class="field">
+          <label for="b-year">Year <span class="req">*</span></label>
+          <input type="number" id="b-year" min="1900" max="2999" />
+          <small class="error" data-error-for="b-year"></small>
+        </div>
+
+        <div class="field">
+          <label for="b-limit">Limit <span class="req">*</span></label>
+          <input type="number" id="b-limit" min="0.01" step="0.01" placeholder="0.00" />
+          <small class="error" data-error-for="b-limit"></small>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="b-submit">Save</button>
+          <button type="button" class="btn btn-ghost hidden" id="b-cancel">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr><th>Category</th><th>Month / Year</th><th>Limit</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="budget-list"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
