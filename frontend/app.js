@@ -2,7 +2,9 @@
 (() => {
   'use strict';
 
-  const API = 'http://localhost:3000/api';
+  // Relative URL: works whether the frontend is served by the API
+  // (http://localhost:3000) or via a separate static server with CORS.
+  const API = '/api';
 
   const MONTHS = [
     'January','February','March','April','May','June',

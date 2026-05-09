@@ -122,11 +122,20 @@ npm start            # plain node (production-style)
 The server listens on `http://localhost:3000`. Visit
 `http://localhost:3000/api-docs` for the interactive Swagger UI.
 
-### 6. Open the frontend
+### 6. Open the app
 
-Open `frontend/index.html` directly in your browser. The first thing you'll see
-is the **Login / Register** screen. Create an account, and the dashboard
-takes over — you'll never need to log in again until the refresh token expires.
+The Express server also serves the frontend on the same origin, so a single
+URL is all you need:
+
+| URL | What's there |
+|-----|--------------|
+| **`http://localhost:3000`**           | The app — login screen, then dashboard |
+| `http://localhost:3000/api-docs`      | Swagger UI (interactive API documentation) |
+| `http://localhost:3000/api/*`         | Raw JSON API |
+| `http://localhost:3000/health`        | Health probe |
+
+Visit `http://localhost:3000`, register an account, and the dashboard takes
+over — you'll never need to log in again until the refresh token expires.
 
 ## Authentication
 

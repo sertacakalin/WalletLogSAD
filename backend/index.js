@@ -42,9 +42,16 @@ app.use('/api/transactions', requireAuth, transactionRoutes);
 app.use('/api/budgets',      requireAuth, budgetRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
 
-app.get('/', (_req, res) => res.redirect('/api-docs'));
+// Serve the SPA frontend on the same origin as the API.
+// Visiting http://localhost:3000 lands on the login screen.
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
-app.use((_req, res) => res.status(404).json({ error: 'Route not found' }));
+app.use((req, res) => {
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ error: 'Route not found' });
+  }
+  return res.status(404).sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
+});
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
