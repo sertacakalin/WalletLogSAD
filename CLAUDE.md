@@ -121,7 +121,18 @@ open frontend/index.html   # or serve via Live Server
 - 5% Git — frequent, meaningful commits
 
 ## Known Risks / Things to Watch
-- ⚠️ **Path contains Turkish chars** (`adsız klasör`). On macOS, `jest --runInBand` hangs indefinitely on this path because jest-haste-map deadlocks during fs.stat traversal. Tests pass cleanly when the project lives at an ASCII path. **Recommended action: move the project to `~/Desktop/walletlog` or `~/projects/walletlog`** before final submission. Until then, run tests inside `/tmp/wl-mini` (mirrored copy) — see `npm test` script note in README.
+- ⚠️ **Never put this project under `~/Desktop` or `~/Documents`.** Those folders
+  are iCloud-synced on this machine. iCloud evicts `node_modules` files to the
+  cloud ("dataless"), and any `require()` / jest / `node index.js` then blocks
+  for minutes (or forever) while macOS tries to re-download them. Symptom: the
+  process runs but produces zero output and never listens. **Fix already applied:
+  project lives at `~/walletlog` (home root, not synced).** If tests/server ever
+  hang again with no output, first check the project isn't back under Desktop.
+  (The earlier "Turkish chars / ASCII path" theory was wrong — it was iCloud.)
+- jest config: `package.json` has `"jest": { "watchman": false }` — without it
+  `jest` hangs on macOS when watchman isn't installed. Keep it.
+- Postgres: **port 5433** (Homebrew `postgresql@15`, `trust` auth — no password).
+  Port 5432 is a different, password-protected install — don't use it. `.env`
+  already points at 5433.
 - CORS is wide open (`cors()`) — fine for local, document it.
 - `.env` is in `.gitignore` ✅ — never commit secrets.
-- Walletlog is currently inside a parent git repo (Desktop). Needs its own `git init` before pushing to GitHub.

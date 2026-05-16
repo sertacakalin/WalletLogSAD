@@ -446,7 +446,7 @@ This is a graded local-demo app, so operations is light by design:
 
 ## 16. Deployment Model
 
-For the course: the demo is **local**. Backend `npm start` on port 3000, Postgres on 5432, frontend opened from `file://` or a static server. All grading happens on the developer's laptop, screen-shared.
+For the course: the demo is **local**. Backend `npm start` on port 3000, Postgres on 5433 (Homebrew `postgresql@15`), frontend served by Express on the same origin (`http://localhost:3000`). All grading happens on the developer's laptop, screen-shared.
 
 If a future iteration needs a real deploy, the path is:
 
@@ -462,7 +462,7 @@ The current code is written so this transition is configuration, not surgery.
 
 | Risk | Severity | Mitigation |
 |---|---|---|
-| Project path contains non-ASCII characters → `jest --runInBand` hangs on macOS | High (blocks tests entirely) | Move repo to an ASCII path (`~/Desktop/walletlog`) before submission; documented in `STATUS.md`. |
+| Project inside an iCloud-synced folder (`~/Desktop`) → iCloud evicts `node_modules`, every `require`/jest/server call hangs on macOS | High (blocks tests + server entirely) | Keep the repo at `~/walletlog` (home root, not iCloud-synced). Already done; documented in `CLAUDE.md` Known Risks. |
 | Adding `user_id` to existing rows | Medium | For the course, do a clean DB reset; full backfill plan documented in `AUTH_DESIGN.md` §9. |
 | `bcrypt` native build fails on a target machine | Low | Fallback to `bcryptjs` is a one-line dependency swap. |
 | CORS is wide-open → won't fly in a real prod | Low for course | Documented in README; production hardening listed in §16. |

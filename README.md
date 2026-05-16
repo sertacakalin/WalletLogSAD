@@ -272,7 +272,7 @@ Validation runs on **both** sides:
 | `password authentication failed` | Wrong credentials in `.env` — verify `DB_USER` and `DB_PASSWORD`. |
 | Frontend gets `Failed to fetch` | API isn't running on `:3000`, or you opened the wrong page. Make sure `npm run dev` is up. |
 | Login works once but app reloads → back to login screen | Cookie was blocked (cross-origin). Open the frontend on the same origin (or via `npx serve`) so the browser keeps the `httpOnly` cookie. |
-| `npm test` hangs forever on macOS | The project path contains non-ASCII characters or spaces. Move it to an ASCII path (e.g. `~/Desktop/walletlog`). |
+| `npm test` / `npm run dev` hangs forever on macOS with no output | The project is inside an iCloud-synced folder (`~/Desktop` or `~/Documents`). iCloud evicts `node_modules` files, so `require()` blocks waiting for downloads. Move the project to a non-synced location like `~/walletlog`, then `rm -rf node_modules && npm ci`. |
 | `429 Too many requests` on login | Rate limiter triggered: 10 req/min/IP on `/api/auth/*`. Wait a minute. |
 | Swagger UI page is blank | Make sure `swagger.yaml` is in the `backend/` folder and the server restarted. |
 

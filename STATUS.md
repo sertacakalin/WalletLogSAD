@@ -5,9 +5,10 @@ A snapshot of the project state for picking work back up later.
 ## TL;DR
 
 The whole stack is implemented and verified. The codebase satisfies every
-graded course requirement. What's left is **manual operator work** — moving
-the folder to an ASCII path, initializing Git/GitHub, and clicking through
-the UI end-to-end with a real Postgres running.
+graded course requirement. Git/GitHub is set up, the project has been moved
+out of iCloud to `~/walletlog`, and the server + DB are verified working.
+What's left is **manual operator work** — clicking through the UI end-to-end,
+screenshots, final commit, and the submission ZIP. See `NEXT_STEPS.md`.
 
 ## Done — Code & Tooling
 
@@ -55,10 +56,10 @@ the UI end-to-end with a real Postgres running.
 
 These are blocking submission but cannot/should not be automated.
 
-1. **Move the folder to an ASCII path.** Current path contains Turkish chars (`adsız klasör`); on macOS this freezes `jest --runInBand`. Recommended: `~/Desktop/walletlog/`.
+1. ~~Move the folder out of iCloud.~~ **DONE** — project now lives at `~/walletlog`. (It was under `~/Desktop`, which is iCloud-synced; iCloud evicting `node_modules` made every `require`/jest/server call hang. Home root is not synced.) See `NEXT_STEPS.md` for current status — that file supersedes this one.
 2. **`git init` + first commit + GitHub remote.**
    ```bash
-   cd ~/Desktop/walletlog
+   cd ~/walletlog
    git init
    git add .
    git commit -m "feat: initial walletlog implementation"
@@ -94,7 +95,7 @@ If any of those break, that's the regression to fix first.
 
 ## Known Gotchas
 
-- **Path with non-ASCII chars** — biggest one. Tests hang silently on macOS until you move the project.
+- **Never move this project under `~/Desktop` or `~/Documents`** — those are iCloud-synced. iCloud evicts `node_modules`, then every `require`/jest/server call hangs silently. Keep it at `~/walletlog`. (Already fixed; this is a "don't regress" note.)
 - **CORS is wide-open** (`cors()` no options). Fine for the local dev demo, but a real prod deploy would tighten origins.
 - **No automated route tests** — course explicitly says routes don't need tests, but if a presenter asks, the answer is: services are unit-tested, routes are thin pass-throughs verified manually + via Swagger UI.
 - **No DB integration tests** — same reasoning. Could be added with `pg-mem` if a stretch goal appears.

@@ -1,28 +1,47 @@
 # Sıradaki Adımlar — Operatör Kontrol Listesi
 
 Kod tarafı bitti. Testler geçiyor, lint temiz, server boot ediyor, auth bağlı.
-Geriye **operatör işi** kaldı: git init, GitHub'a ilk push, veritabanı resetlemesi,
-manuel UI denemesi, ekran görüntüleri ve teslim için ZIP.
+Geriye **operatör işi** kaldı: veritabanı resetlemesi, manuel UI denemesi,
+ekran görüntüleri ve teslim için ZIP.
 
 Adımları sırayla uygula. Her bloktaki komutlar kopyala-yapıştır ile direkt çalışır.
 
 ---
 
+## Durum (2026-05-15 güncellendi)
+
+| Adım | İş | Durum |
+|------|----|-------|
+| 1-3  | Git init + ilk commit + GitHub push | ✅ Bitti — `origin` bağlı, `main` push'lu, 3 commit |
+| —    | `npm test` takılma sorunu (jest/watchman) | ✅ Düzeltildi — `package.json`'a `"jest": {"watchman": false}` eklendi |
+| —    | **Proje iCloud dışına taşındı** | ✅ `~/Desktop/...` → `~/walletlog`. Desktop iCloud-senkronluydu, `node_modules` dosyaları buluta tahliye edilince `require`/jest/server hepsi donuyordu. `node_modules` yeniden kuruldu. |
+| 4    | DB'yi şema ile resetle | ✅ Bitti — `walletlog` DB'si **port 5433**'te resetlendi, 5 tablo boş |
+| 5    | API başlat + Swagger aç | ✅ Doğrulandı — server boot ediyor, `/health` ok, `/` SPA 200, register 201 (DB bağlı). Swagger'ı sen aç. |
+| 6    | Manuel UI tıklama turu | ⬜ **Buradan başla** |
+| 7    | Ekran görüntüleri + README | ⬜ Yapılacak |
+| 8-10 | Test/lint kilidi + son commit + ZIP | ⬜ Yapılacak |
+
+> Adım 1-5 tamam. **Adım 6'dan başla** — `npm run dev` ile server'ı sen başlat,
+> tarayıcıda tıklama turunu yap. Commit bekleyen değişiklikler var (jest fix +
+> bu doküman güncellemeleri) → Adım 3.5.
+
+---
+
 ## 0. Hızlı bağlam
 
-- **GitHub repo:** `WalletLogSAD` (zaten hesabında oluşturdun)
-- **Yerel klasör:** `/Users/sertacakalin/Desktop/Projects/WalletLog/walletlog`
+- **GitHub repo:** `WalletLogSAD` → `https://github.com/sertacakalin/WalletLogSAD.git` (bağlı, push'lu)
+- **Yerel klasör:** `~/walletlog`
 - **Teslim takvimi:** ZIP — 2026-05-21 · sunumlar 2026-05-22 ve 2026-06-05
 
 ---
 
-## 1. `walletlog/` klasörünü kendi Git deposu yap
+## 1. `walletlog/` klasörünü kendi Git deposu yap — ✅ BİTTİ
 
 > Şu an `walletlog/` üst bir Git deposunun **içinde** (ev klasörün ya da
 > Desktop). GitHub'a sadece bu projeyi push edebilmek için kendi `.git`'i olmalı.
 
 ```bash
-cd /Users/sertacakalin/Desktop/Projects/WalletLog/walletlog
+cd ~/walletlog
 git init
 git branch -M main
 ```
@@ -49,7 +68,7 @@ commit'ten önce `.gitignore`'u düzelt, yoksa gerçek secret GitHub'a düşer.
 
 ---
 
-## 2. İlk commit
+## 2. İlk commit — ✅ BİTTİ
 
 ```bash
 git add .
@@ -61,7 +80,7 @@ gerçekten dosya stage edildi mi kontrol et.
 
 ---
 
-## 3. GitHub remote'unu bağla ve push et
+## 3. GitHub remote'unu bağla ve push et — ✅ BİTTİ
 
 `<USER>` kısmına GitHub kullanıcı adını koy (lokal git config'in
 `sertacakalin22@istanbularel.edu.tr`, ama GitHub kullanıcı adın farklı
@@ -93,32 +112,49 @@ git push -u origin main
 
 ---
 
-## 4. Veritabanını yeni şema ile resetle
+## 3.5. Bekleyen jest fix'ini commit'le
+
+`npm test` eskiden sonsuza kadar takılıyordu (jest haste-map / watchman sorunu).
+`backend/package.json`'a `"jest": { "watchman": false }` eklendi — düzeldi.
+Bu değişiklik henüz commit edilmedi:
 
 ```bash
-psql -U postgres -c "DROP DATABASE IF EXISTS walletlog;"
-psql -U postgres -c "CREATE DATABASE walletlog;"
-psql -U postgres -d walletlog -f /Users/sertacakalin/Desktop/Projects/WalletLog/walletlog/backend/schema.sql
+cd ~/walletlog
+git add backend/package.json NEXT_STEPS.md
+git commit -m "fix: disable jest watchman to stop test runner from hanging"
+git push
 ```
 
-Tabloların oluştuğunu doğrula:
+---
+
+## 4. Veritabanını yeni şema ile resetle — ✅ BİTTİ
+
+> **DİKKAT — port 5433.** Makinende iki Postgres var:
+> - **5432:** başka bir kurulum, şifre istiyor, şifresi bilinmiyor — KULLANMA.
+> - **5433:** Homebrew `postgresql@15`, `trust` auth (şifre gerekmez) — projenin
+>   kullandığı bu. `.env` zaten `DB_PORT=5433`. Tüm `psql` komutlarına
+>   `-p 5433` eklemeyi unutma.
+
+Zaten yapıldı — `walletlog` DB'si 5433'te resetlendi, 5 tablo boş. Tekrar
+resetlemek istersen (demo öncesi temiz başlangıç için):
+
 ```bash
-psql -U postgres -d walletlog -c "\dt"
+psql -p 5433 -U postgres -d walletlog -f ~/walletlog/backend/schema.sql
 ```
-Beklenen çıktı: `users`, `refresh_tokens`, `categories`, `transactions`, `budgets`.
 
-`psql` her seferinde parola soruyorsa `~/.pgpass` oluştur:
+`schema.sql` başında `DROP TABLE IF EXISTS` var, idempotent — istediğin kadar
+çalıştır. Doğrula:
+```bash
+psql -p 5433 -U postgres -d walletlog -c "\dt"
 ```
-localhost:5432:walletlog:postgres:postgres
-```
-(Dosya izni mutlaka `chmod 600 ~/.pgpass` olmalı.)
+Beklenen: `users`, `refresh_tokens`, `categories`, `transactions`, `budgets`.
 
 ---
 
 ## 5. API'yi başlat + Swagger'ı aç
 
 ```bash
-cd /Users/sertacakalin/Desktop/Projects/WalletLog/walletlog/backend
+cd ~/walletlog/backend
 npm run dev
 ```
 
@@ -149,7 +185,7 @@ Tarayıcıda `frontend/index.html`'i aç. Eğer cookie `file://`'da takılırsa
 bir static server kullan:
 
 ```bash
-cd /Users/sertacakalin/Desktop/Projects/WalletLog/walletlog
+cd ~/walletlog
 npx serve frontend -p 5173
 # tarayıcıda http://localhost:5173
 ```
@@ -230,7 +266,7 @@ npm run lint
 ## 9. Son commit + push
 
 ```bash
-cd /Users/sertacakalin/Desktop/Projects/WalletLog/walletlog
+cd ~/walletlog
 git add .
 git commit -m "docs: screenshots + ops checklist"
 git push
@@ -249,7 +285,7 @@ git push --tags
 Grader `node_modules/` veya `.env`'i ZIP içinde **istemez**.
 
 ```bash
-cd /Users/sertacakalin/Desktop/Projects/WalletLog
+cd ~
 zip -r WalletLogSAD-Sertac.zip walletlog \
   -x "walletlog/backend/node_modules/*" \
   -x "walletlog/backend/.env" \
