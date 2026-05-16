@@ -35,5 +35,8 @@
     "eslint": "^8.57.1",
     "jest": "^29.7.0",
     "nodemon": "^3.1.4"
+  },
+  "jest": {
+    "watchman": false
   }
 }
