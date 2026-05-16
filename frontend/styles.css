@@ -1,231 +1,536 @@
+/* WalletLog — Editorial / Newspaper aesthetic.
+   Ink on paper. Hairline rules. No shadows, no rounded corners.
+   Serif headings, sans body, tabular monospace for figures. */
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #f4f4f4;
-  --card: #ffffff;
-  --primary: #3498db;
-  --primary-dark: #2c80b4;
-  --danger: #e74c3c;
-  --ghost: #ecf0f1;
-  --ghost-dark: #d5dbdc;
-  --income: #27ae60;
-  --expense: #e74c3c;
-  --warning: #e74c3c;
-  --text: #2c3e50;
-  --muted: #7f8c8d;
-  --border: #dde1e3;
-  --error: #c0392b;
-  --success: #155724;
-  --error-bg: #f8d7da;
-  --success-bg: #d4edda;
-  --neutral-bg: #d1ecf1;
+  /* Paper & ink */
+  --paper:        #faf8f3;
+  --paper-soft:   #f0ebde;
+  --ink:          #161513;
+  --ink-soft:     #3a3733;
+  --muted:        #7a766b;
+  --rule:         #1a1816;
+  --rule-soft:    #d7d1bf;
+
+  /* Single accent — oxblood. Used for danger, validation, OVER signals. */
+  --accent:       #7a1f1f;
+  --accent-deep:  #5e1515;
+
+  /* Semantic ink (sparingly, as TEXT color only — never backgrounds) */
+  --positive:     #1f4a2c;
+  --negative:     #7a1f1f;
+
+  /* Type stacks (all OS-native — no external fonts) */
+  --serif:  "Iowan Old Style", "Apple Garamond", "Hoefler Text", Garamond, Cambria, Georgia, "Times New Roman", serif;
+  --sans:   -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Helvetica, Arial, sans-serif;
+  --mono:   ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.4;
+html, body {
+  background: var(--paper);
+  color: var(--ink);
 }
+body {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.5;
+  font-feature-settings: "kern", "liga";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================ TOP BAR */
+
+.topbar {
+  display: flex;
+  align-items: baseline;
+  gap: 1.25rem;
+  padding: 1.1rem 2rem 0.85rem;
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper);
+}
+.topbar .brand {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1.35rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.topbar .who {
+  flex: 1;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-feature-settings: "tnum";
+}
+.topbar .btn { padding: 0.35rem 0.85rem; font-size: 0.72rem; }
+
+/* ============================================================ NAV */
 
 nav {
-  background: var(--text);
-  padding: 0.75rem 1.5rem;
+  background: transparent;
+  padding: 0.45rem 2rem 0;
   display: flex;
-  gap: 0.5rem;
+  gap: 1.75rem;
+  border-bottom: 2px solid var(--rule);
   flex-wrap: wrap;
 }
 nav button {
   background: transparent;
   border: none;
-  color: white;
+  color: var(--ink-soft);
   cursor: pointer;
-  font-size: 1rem;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  font-family: var(--sans);
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 0.45rem 0;
+  margin-bottom: -2px;
+  border-bottom: 2px solid transparent;
+  transition: color 80ms;
 }
-nav button:hover, nav button.active { background: rgba(255,255,255,0.15); }
+nav button:hover { color: var(--ink); }
+nav button.active {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
 
-.page { display: none; padding: 1.5rem; max-width: 1100px; margin: 0 auto; }
+/* ============================================================ PAGES */
+
+.page { display: none; padding: 2rem; max-width: 1100px; margin: 0 auto; }
 .page.active { display: block; }
 
-h2 { margin-bottom: 1rem; color: var(--text); }
-h3 { margin-bottom: 0.75rem; color: var(--text); font-weight: 600; }
+h2 {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1.8rem;
+  letter-spacing: -0.005em;
+  margin: 2rem 0 1rem;
+  color: var(--ink);
+}
+h2:first-child { margin-top: 0; }
 
-.card {
-  background: var(--card);
-  border-radius: 8px;
-  padding: 1.25rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+h3 {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 0.85rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid var(--rule-soft);
 }
 
-.field { margin-bottom: 0.75rem; }
-.field label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 0.25rem; }
-.field .req { color: var(--danger); }
+/* ============================================================ CARDS
+   Not cards in the Bootstrap sense — just sections divided by rules. */
+
+.card {
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--rule);
+  padding: 1.4rem 0 1.5rem;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.card + .card { margin-top: 0; }
+.page > .card:first-of-type { border-top: none; padding-top: 0.25rem; }
+
+/* ============================================================ FORMS */
+
+.field { margin-bottom: 1rem; }
+.field label,
+.filters > label {
+  display: block;
+  font-family: var(--sans);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.3rem;
+}
+.field .req { color: var(--accent); margin-left: 0.15rem; }
 
 input, select, textarea {
   width: 100%;
-  padding: 0.55rem 0.7rem;
-  border: 1px solid var(--border);
-  border-radius: 4px;
+  padding: 0.45rem 0;
+  border: none;
+  border-bottom: 1px solid var(--rule-soft);
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--sans);
   font-size: 1rem;
-  background: white;
-  font-family: inherit;
+  color: var(--ink);
+  transition: border-color 80ms;
 }
-input[type="color"] { width: 60px; height: 38px; padding: 2px; }
+input::placeholder, textarea::placeholder { color: var(--muted); font-style: italic; }
+input[type="number"],
+input[type="date"] {
+  font-family: var(--mono);
+  font-feature-settings: "tnum";
+  font-size: 0.95rem;
+}
+input[type="color"] {
+  width: 34px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--ink);
+  cursor: pointer;
+  background: var(--paper);
+}
+textarea { resize: vertical; min-height: 2.4rem; }
 input:focus, select:focus, textarea:focus {
   outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+  border-bottom-color: var(--ink);
 }
-input.invalid, select.invalid {
-  border-color: var(--error);
-  background: #fff5f5;
+input.invalid, select.invalid, textarea.invalid {
+  border-bottom-color: var(--accent);
 }
+
+/* Custom select arrow — geometric chevron */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--ink) 50%),
+    linear-gradient(135deg, var(--ink) 50%, transparent 50%);
+  background-position:
+    calc(100% - 10px) 55%,
+    calc(100% - 5px)  55%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 1.5rem;
+  cursor: pointer;
+}
+select:disabled { color: var(--muted); cursor: not-allowed; }
 
 .error {
   display: block;
-  color: var(--error);
-  font-size: 0.85rem;
-  margin-top: 0.2rem;
-  min-height: 1.1rem;
+  font-family: var(--sans);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-style: italic;
+  margin-top: 0.3rem;
+  min-height: 1rem;
 }
 
-.form-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+.form-actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
+
+/* ============================================================ BUTTONS
+   Sharp rectangles. Uppercase tracking. Two intentional states. */
 
 .btn {
-  padding: 0.55rem 1.1rem;
-  border: none;
-  border-radius: 4px;
+  padding: 0.5rem 1.15rem;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
   cursor: pointer;
-  font-size: 0.95rem;
-  font-weight: 500;
+  font-family: var(--sans);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: background 80ms, color 80ms, border-color 80ms;
 }
-.btn-primary { background: var(--primary); color: white; }
-.btn-primary:hover { background: var(--primary-dark); }
-.btn-danger  { background: var(--danger);  color: white; }
-.btn-danger:hover { opacity: 0.9; }
-.btn-ghost   { background: var(--ghost); color: var(--text); }
-.btn-ghost:hover { background: var(--ghost-dark); }
-.btn-row { display: inline-flex; gap: 0.3rem; }
+.btn:hover { background: var(--ink); color: var(--paper); }
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn-primary { background: var(--ink); color: var(--paper); }
+.btn-primary:hover { background: var(--accent); border-color: var(--accent); color: var(--paper); }
+
+.btn-danger { background: var(--paper); color: var(--accent); border-color: var(--accent); }
+.btn-danger:hover { background: var(--accent); color: var(--paper); }
+
+.btn-ghost { background: transparent; border-color: var(--rule-soft); color: var(--muted); }
+.btn-ghost:hover { background: var(--paper-soft); color: var(--ink); border-color: var(--ink); }
+
+.btn-row { display: inline-flex; gap: 0.4rem; }
+.btn-row .btn { padding: 0.3rem 0.65rem; font-size: 0.66rem; }
 
 .hidden { display: none !important; }
 
-table { width: 100%; border-collapse: collapse; }
-th, td { padding: 0.65rem 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
-th { background: #f8f9fa; font-weight: 600; }
+/* ============================================================ TABLES
+   Newspaper data table. Hairlines only, tabular numerals. */
 
-.income  { color: var(--income);  font-weight: 600; }
-.expense { color: var(--expense); font-weight: 600; }
-.warning { color: var(--warning); font-weight: 700; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--sans);
+  font-size: 0.92rem;
+  margin-top: 0.5rem;
+}
+thead { border-top: 1px solid var(--rule); border-bottom: 2px solid var(--rule); }
+th {
+  text-align: left;
+  font-family: var(--sans);
+  font-size: 0.64rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  padding: 0.65rem 0.5rem;
+  background: transparent;
+}
+td {
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid var(--rule-soft);
+  color: var(--ink);
+  vertical-align: middle;
+}
+tbody tr:last-child td { border-bottom: 1px solid var(--rule); }
+tbody tr:hover { background: var(--paper-soft); }
+
+/* Figure columns line up with tabular numerals. We target by position
+   so the type-label cell ("Income"/"Expense" text) stays in sans while
+   the amount cell ($4,200.00) goes to mono. */
+#transaction-list td:nth-child(5),   /* Amount */
+#budget-list td:nth-child(3) {       /* Limit */
+  font-family: var(--mono);
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+#transaction-list th:nth-child(5),
+#budget-list th:nth-child(3) {
+  text-align: right;
+}
+
+/* ============================================================ INCOME / EXPENSE / WARNING
+   Signals are TEXT color only — no pastel backgrounds. */
+
+.income  { color: var(--positive); font-weight: 600; }
+.expense { color: var(--negative); font-weight: 600; }
+.warning {
+  color: var(--accent);
+  font-family: var(--sans);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.82rem;
+}
+
+/* Dashboard summary figures get a directional glyph (↑ / ↓). Table
+   cells keep the value clean so columns stay aligned. */
+.summary-card p.income::before  { content: "↑ "; color: var(--positive); }
+.summary-card p.expense::before { content: "↓ "; color: var(--negative); }
+
+/* ============================================================ FILTERS */
 
 .filters {
   display: flex;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  gap: 1.5rem;
+  margin: 0 0 1.25rem;
   flex-wrap: wrap;
-  align-items: end;
+  align-items: flex-end;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--rule-soft);
 }
-.filters label { display: flex; flex-direction: column; font-size: 0.85rem; font-weight: 600; }
-.filters input, .filters select { width: auto; min-width: 140px; }
+.filters > label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.filters input, .filters select { width: auto; min-width: 150px; }
+.filters .btn { align-self: flex-end; }
 
-.summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
-.summary-card { padding: 1rem; border-radius: 8px; text-align: center; }
-.summary-card h3 { font-size: 0.9rem; margin-bottom: 0.3rem; opacity: 0.7; }
-.summary-card p  { font-size: 1.6rem; font-weight: 700; }
-.income-bg  { background: var(--success-bg); }
-.expense-bg { background: var(--error-bg); }
-.neutral-bg { background: var(--neutral-bg); }
+/* ============================================================ SUMMARY GRID
+   Three columns separated by single hairlines. Not boxed; just framed. */
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  margin: 0.5rem 0 1rem;
+  border-top: 2px solid var(--rule);
+  border-bottom: 2px solid var(--rule);
+}
+.summary-card {
+  padding: 1.15rem 1.25rem;
+  background: transparent;
+  border-radius: 0;
+  text-align: left;
+  border-left: 1px solid var(--rule-soft);
+}
+.summary-card:first-child { border-left: none; }
+.summary-card h3 {
+  border-bottom: none;
+  padding: 0;
+  margin: 0 0 0.45rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+}
+.summary-card p {
+  font-family: var(--mono);
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+  font-size: 1.7rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+/* HTML markers from the original pastel design — explicitly neutralized. */
+.income-bg, .expense-bg, .neutral-bg { background: transparent; }
+
+/* ============================================================ BUDGET STATUS
+   Override the generic h3 styling: here h3 holds the actual budget
+   category name and the BUDGET EXCEEDED flag — it should be prominent. */
+
+#budget-status-list .card {
+  padding: 1.1rem 0 1.2rem;
+}
+#budget-status-list .card h3 {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink);
+  border-bottom: none;
+  padding: 0;
+  margin-bottom: 0.35rem;
+}
+#budget-status-list .card p {
+  font-family: var(--sans);
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+}
+#budget-status-list .card.muted {
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* ============================================================ TOAST
+   Newspaper sidebar — sharp, hairline border, single accent stripe. */
 
 .toast {
   position: fixed;
-  top: 1rem;
-  right: 1rem;
-  padding: 0.6rem 1rem;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  top: 1.25rem;
+  right: 1.25rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--ink);
+  border-left-width: 4px;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 0.85rem;
   font-weight: 500;
   z-index: 100;
   display: none;
-  max-width: 320px;
+  max-width: 360px;
 }
-.toast.success { background: var(--success-bg); color: var(--success); display: block; }
-.toast.error   { background: var(--error-bg);   color: var(--error);   display: block; }
+.toast.success { border-left-color: var(--positive); display: block; }
+.toast.error   { border-left-color: var(--accent); color: var(--accent); display: block; }
+
+/* ============================================================ MISC */
 
 .color-swatch {
   display: inline-block;
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 0;
   vertical-align: middle;
-  border: 1px solid var(--border);
+  border: 1px solid var(--ink);
 }
-
 .muted { color: var(--muted); font-style: italic; }
 
-@media (max-width: 600px) {
-  .filters { flex-direction: column; align-items: stretch; }
-  .filters input, .filters select { width: 100%; }
-}
-
-/* -------------------- Auth screen -------------------- */
+/* ============================================================ AUTH SCREEN
+   Newsstand cover. Brand framed by rules above and below. */
 
 .auth-shell {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
-  background: var(--bg);
+  padding: 2rem;
+  background: var(--paper);
 }
 .auth-card {
-  background: var(--card);
   width: 100%;
-  max-width: 380px;
-  border-radius: 8px;
-  padding: 1.75rem 1.5rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  max-width: 360px;
+  background: transparent;
+  border: none;
+  border-top: 3px solid var(--rule);
+  border-bottom: 3px solid var(--rule);
+  border-radius: 0;
+  padding: 1.75rem 0 2rem;
+  box-shadow: none;
 }
 .auth-brand {
   text-align: center;
-  margin-bottom: 1rem;
-  color: var(--primary);
-  letter-spacing: 0.4px;
+  margin: 0 0 1.5rem;
+  padding: 0.55rem 0;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  border-top: 1px solid var(--rule-soft);
+  border-bottom: 1px solid var(--rule-soft);
 }
 .auth-tabs {
   display: flex;
-  margin-bottom: 1.25rem;
-  border-bottom: 1px solid var(--border);
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--rule-soft);
 }
 .auth-tab {
-  flex: 1;
   background: transparent;
   border: none;
-  padding: 0.6rem 0;
-  font-size: 1rem;
-  font-weight: 600;
+  padding: 0.55rem 0;
+  font-family: var(--sans);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   cursor: pointer;
   color: var(--muted);
   border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 80ms;
 }
+.auth-tab:hover { color: var(--ink); }
 .auth-tab.active {
-  color: var(--primary);
-  border-bottom-color: var(--primary);
+  color: var(--ink);
+  border-bottom-color: var(--accent);
 }
-.auth-form .form-actions { margin-top: 0.75rem; }
-.auth-form .btn-primary  { width: 100%; }
+.auth-form .form-actions { margin-top: 1.25rem; justify-content: stretch; }
+.auth-form .btn-primary  { width: 100%; padding: 0.7rem; font-size: 0.78rem; }
 
-/* -------------------- Top bar -------------------- */
+/* ============================================================ RESPONSIVE */
 
-.topbar {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.6rem 1.5rem;
-  background: white;
-  border-bottom: 1px solid var(--border);
+@media (max-width: 720px) {
+  .topbar, nav, .page { padding-left: 1rem; padding-right: 1rem; }
+  .topbar { flex-wrap: wrap; }
+  .topbar .who { font-size: 0.7rem; }
+  nav { gap: 1rem; }
+  .summary-grid { grid-template-columns: 1fr; border: none; }
+  .summary-card {
+    border-left: none;
+    border-top: 1px solid var(--rule-soft);
+    padding: 1rem 0;
+  }
+  .summary-card:first-child { border-top: 2px solid var(--rule); }
+  .summary-card:last-child  { border-bottom: 2px solid var(--rule); }
+  .filters { gap: 0.8rem; }
+  .filters input, .filters select { width: 100%; min-width: 0; }
+  .btn-row .btn { padding: 0.3rem 0.5rem; }
+  table { font-size: 0.84rem; }
+  th, td { padding: 0.5rem 0.4rem; }
 }
-.topbar .brand { font-weight: 700; color: var(--primary); }
-.topbar .who   { color: var(--muted); font-size: 0.9rem; flex: 1; }
-.topbar .btn   { padding: 0.4rem 0.9rem; font-size: 0.9rem; }
