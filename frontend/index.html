@@ -20,7 +20,6 @@
       <button class="auth-tab"        id="tab-register" role="tab" aria-selected="false">Register</button>
     </div>
 
-    <!-- Login form -->
     <form id="login-form" class="auth-form" novalidate>
       <div class="field">
         <label for="login-email">Email <span class="req">*</span></label>
@@ -37,7 +36,6 @@
       </div>
     </form>
 
-    <!-- Register form (hidden by default) -->
     <form id="register-form" class="auth-form hidden" novalidate>
       <div class="field">
         <label for="reg-display">Display name</label>
@@ -71,36 +69,122 @@
   </header>
 
   <nav>
-    <button data-page="dashboard">Dashboard</button>
+    <button data-page="dashboard" class="active">Dashboard</button>
     <button data-page="transactions">Transactions</button>
     <button data-page="categories">Categories</button>
     <button data-page="budgets">Budgets</button>
+    <button data-page="wallets">Wallets</button>
+    <button data-page="recurring">Recurring</button>
   </nav>
 
-  <!-- DASHBOARD -->
+  <!-- ============================== DASHBOARD ============================== -->
   <section id="dashboard" class="page active">
-    <h2>Monthly Summary</h2>
-    <div class="card">
-      <div class="filters">
-        <label>Month
-          <select id="sum-month"></select>
-        </label>
-        <label>Year
-          <input type="number" id="sum-year" min="1900" max="2999" />
-        </label>
+
+    <!-- Header: period selector + quick actions -->
+    <div class="dash-header">
+      <div class="dash-period">
+        <label class="dash-label">Period</label>
+        <select id="sum-month" aria-label="Month"></select>
+        <input type="number" id="sum-year" min="1900" max="2999" aria-label="Year" />
         <button class="btn btn-primary" id="btn-load-summary">Show</button>
       </div>
-      <div class="summary-grid">
-        <div class="summary-card income-bg"><h3>Income</h3>  <p id="sum-income"  class="income">-</p></div>
-        <div class="summary-card expense-bg"><h3>Expense</h3><p id="sum-expense" class="expense">-</p></div>
-        <div class="summary-card neutral-bg"><h3>Balance</h3><p id="sum-balance">-</p></div>
+      <div class="dash-quick-actions" id="quick-actions">
+        <button class="btn btn-quick" data-quick="transaction">+ Add Transaction</button>
+        <button class="btn btn-quick" data-quick="budget">+ Add Budget</button>
+        <button class="btn btn-quick" data-quick="category">+ Add Category</button>
+        <button class="btn btn-quick" data-quick="wallet">+ Add Wallet</button>
       </div>
     </div>
-    <h2>Budget Status</h2>
-    <div id="budget-status-list"></div>
+
+    <!-- 1. Summary Cards -->
+    <div class="summary-grid">
+      <article class="summary-card">
+        <div class="summary-card__top">
+          <span class="summary-card__icon" aria-hidden="true">◐</span>
+          <h3 class="summary-card__title">Total Balance</h3>
+        </div>
+        <p class="summary-card__value" id="card-balance">—</p>
+        <p class="summary-card__hint">Across all wallets</p>
+      </article>
+      <article class="summary-card">
+        <div class="summary-card__top">
+          <span class="summary-card__icon" aria-hidden="true">↑</span>
+          <h3 class="summary-card__title">Monthly Income</h3>
+        </div>
+        <p class="summary-card__value income" id="card-income">—</p>
+        <p class="summary-card__hint" id="card-income-period">This month</p>
+      </article>
+      <article class="summary-card">
+        <div class="summary-card__top">
+          <span class="summary-card__icon" aria-hidden="true">↓</span>
+          <h3 class="summary-card__title">Monthly Expense</h3>
+        </div>
+        <p class="summary-card__value expense" id="card-expense">—</p>
+        <p class="summary-card__hint" id="card-expense-period">This month</p>
+      </article>
+      <article class="summary-card">
+        <div class="summary-card__top">
+          <span class="summary-card__icon" aria-hidden="true">%</span>
+          <h3 class="summary-card__title">Savings Rate</h3>
+        </div>
+        <p class="summary-card__value" id="card-savings">—</p>
+        <p class="summary-card__hint">(Income − Expense) ÷ Income</p>
+      </article>
+    </div>
+
+    <!-- 2. Insights -->
+    <section class="card insights" id="insights-card">
+      <h3 class="card-title">This Month's Insights</h3>
+      <ul class="insights-list" id="insights-list"></ul>
+    </section>
+
+    <!-- 3. Charts -->
+    <div class="charts-grid">
+      <section class="card chart-card">
+        <h3 class="card-title">Expense by Category</h3>
+        <div class="donut-wrap">
+          <svg id="chart-donut" viewBox="0 0 200 200" role="img" aria-label="Expense by category"></svg>
+          <div class="donut-center">
+            <span class="donut-center__label">Total</span>
+            <span class="donut-center__value" id="donut-total">—</span>
+          </div>
+        </div>
+        <ul class="chart-legend" id="chart-donut-legend"></ul>
+      </section>
+      <section class="card chart-card">
+        <h3 class="card-title">6-Month Spending Trend</h3>
+        <svg id="chart-line" viewBox="0 0 400 200" role="img" aria-label="6 month expense trend"></svg>
+        <div class="chart-tooltip" id="chart-tooltip" hidden></div>
+      </section>
+    </div>
+
+    <!-- 4. Budget Tracking -->
+    <section class="card">
+      <h3 class="card-title">Budget Tracking</h3>
+      <div id="budget-status-list"></div>
+    </section>
+
+    <!-- 5. Upcoming Payments -->
+    <section class="card">
+      <div class="card-head">
+        <h3 class="card-title">Upcoming Payments</h3>
+        <button class="btn btn-ghost" data-page-link="recurring">Manage</button>
+      </div>
+      <ul class="upcoming-list" id="upcoming-list"></ul>
+    </section>
+
+    <!-- 6. Recent Transactions -->
+    <section class="card">
+      <div class="card-head">
+        <h3 class="card-title">Recent Transactions</h3>
+        <button class="btn btn-ghost" data-page-link="transactions">View All Transactions</button>
+      </div>
+      <ul class="recent-list" id="recent-list"></ul>
+    </section>
+
   </section>
 
-  <!-- TRANSACTIONS -->
+  <!-- ============================== TRANSACTIONS ============================== -->
   <section id="transactions" class="page">
     <h2>Transactions</h2>
 
@@ -135,6 +219,11 @@
         </div>
 
         <div class="field">
+          <label for="t-wallet">Wallet</label>
+          <select id="t-wallet"></select>
+        </div>
+
+        <div class="field">
           <label for="t-date">Date <span class="req">*</span></label>
           <input type="date" id="t-date" />
           <small class="error" data-error-for="t-date"></small>
@@ -165,6 +254,9 @@
         <label>Category
           <select id="f-cat"></select>
         </label>
+        <label>Wallet
+          <select id="f-wallet"></select>
+        </label>
         <label>From <input type="date" id="f-start" /></label>
         <label>To   <input type="date" id="f-end"   /></label>
         <button class="btn btn-ghost" id="f-clear">Clear</button>
@@ -172,7 +264,7 @@
       <table>
         <thead>
           <tr>
-            <th>Date</th><th>Title</th><th>Category</th><th>Type</th><th>Amount</th><th>Actions</th>
+            <th>Date</th><th>Title</th><th>Category</th><th>Wallet</th><th>Type</th><th>Amount</th><th>Actions</th>
           </tr>
         </thead>
         <tbody id="transaction-list"></tbody>
@@ -180,7 +272,7 @@
     </div>
   </section>
 
-  <!-- CATEGORIES -->
+  <!-- ============================== CATEGORIES ============================== -->
   <section id="categories" class="page">
     <h2>Categories</h2>
 
@@ -217,7 +309,7 @@
     </div>
   </section>
 
-  <!-- BUDGETS -->
+  <!-- ============================== BUDGETS ============================== -->
   <section id="budgets" class="page">
     <h2>Budget Goals</h2>
 
@@ -262,6 +354,137 @@
           <tr><th>Category</th><th>Month / Year</th><th>Limit</th><th>Actions</th></tr>
         </thead>
         <tbody id="budget-list"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================== WALLETS ============================== -->
+  <section id="wallets" class="page">
+    <h2>Wallets</h2>
+
+    <div class="card">
+      <h3 id="w-form-title">Add Wallet</h3>
+      <form id="w-form" novalidate>
+        <input type="hidden" id="w-id" />
+
+        <div class="field">
+          <label for="w-name">Name <span class="req">*</span></label>
+          <input type="text" id="w-name" maxlength="80" placeholder="e.g. Cash, Bank, Credit Card" />
+          <small class="error" data-error-for="w-name"></small>
+        </div>
+
+        <div class="field">
+          <label for="w-color">Color</label>
+          <input type="color" id="w-color" value="#3a3733" />
+        </div>
+
+        <div class="field">
+          <label for="w-initial">Initial balance</label>
+          <input type="number" id="w-initial" step="0.01" placeholder="0.00" />
+          <small class="muted">Optional. Money you already had in this wallet when you started using WalletLog.</small>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="w-submit">Save</button>
+          <button type="button" class="btn btn-ghost hidden" id="w-cancel">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Color</th><th>Name</th>
+            <th class="num">Initial</th>
+            <th class="num">Income</th>
+            <th class="num">Expense</th>
+            <th class="num">Balance</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="wallet-list"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================== RECURRING ============================== -->
+  <section id="recurring" class="page">
+    <h2>Recurring Transactions</h2>
+
+    <div class="card">
+      <h3 id="r-form-title">Add Recurring</h3>
+      <form id="r-form" novalidate>
+        <input type="hidden" id="r-id" />
+
+        <div class="field">
+          <label for="r-title">Title <span class="req">*</span></label>
+          <input type="text" id="r-title" maxlength="200" placeholder="e.g. Rent, Salary, Netflix" />
+          <small class="error" data-error-for="r-title"></small>
+        </div>
+
+        <div class="field">
+          <label for="r-amount">Amount <span class="req">*</span></label>
+          <input type="number" id="r-amount" min="0.01" step="0.01" placeholder="0.00" />
+          <small class="error" data-error-for="r-amount"></small>
+        </div>
+
+        <div class="field">
+          <label for="r-type">Type <span class="req">*</span></label>
+          <select id="r-type">
+            <option value="expense">Expense</option>
+            <option value="income">Income</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="r-frequency">Frequency <span class="req">*</span></label>
+          <select id="r-frequency">
+            <option value="monthly">Monthly</option>
+            <option value="weekly">Weekly</option>
+            <option value="yearly">Yearly</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="r-next">Next due date <span class="req">*</span></label>
+          <input type="date" id="r-next" />
+          <small class="error" data-error-for="r-next"></small>
+        </div>
+
+        <div class="field">
+          <label for="r-category">Category</label>
+          <select id="r-category"></select>
+        </div>
+
+        <div class="field">
+          <label for="r-wallet">Wallet</label>
+          <select id="r-wallet"></select>
+        </div>
+
+        <div class="field">
+          <label for="r-note">Note</label>
+          <textarea id="r-note" rows="2" placeholder="Optional"></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="r-submit">Save</button>
+          <button type="button" class="btn btn-ghost hidden" id="r-cancel">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Next Due</th><th>Title</th>
+            <th>Category</th><th>Wallet</th>
+            <th>Frequency</th><th>Type</th>
+            <th class="num">Amount</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="recurring-list"></tbody>
       </table>
     </div>
   </section>

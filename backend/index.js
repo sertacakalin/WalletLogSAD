@@ -11,6 +11,9 @@ const authRoutes        = require('./routes/authRoutes');
 const categoryRoutes    = require('./routes/categoryRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
 const budgetRoutes      = require('./routes/budgetRoutes');
+const walletRoutes      = require('./routes/walletRoutes');
+const recurringRoutes   = require('./routes/recurringRoutes');
+const dashboardRoutes   = require('./routes/dashboardRoutes');
 const { errorHandler }  = require('./middleware/errorHandler');
 const { requireAuth }   = require('./middleware/authMiddleware');
 const { authLimiter }   = require('./middleware/rateLimit');
@@ -40,6 +43,9 @@ app.use('/api/auth',         authLimiter, authRoutes);
 app.use('/api/categories',   requireAuth, categoryRoutes);
 app.use('/api/transactions', requireAuth, transactionRoutes);
 app.use('/api/budgets',      requireAuth, budgetRoutes);
+app.use('/api/wallets',      requireAuth, walletRoutes);
+app.use('/api/recurring',    requireAuth, recurringRoutes);
+app.use('/api/dashboard',    requireAuth, dashboardRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
 
 // Serve the SPA frontend on the same origin as the API.

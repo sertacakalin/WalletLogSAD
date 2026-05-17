@@ -2,11 +2,13 @@
 -- Run inside psql after: CREATE DATABASE walletlog; \c walletlog
 -- Drop everything first if you are recreating from scratch.
 
-DROP TABLE IF EXISTS refresh_tokens CASCADE;
-DROP TABLE IF EXISTS budgets        CASCADE;
-DROP TABLE IF EXISTS transactions   CASCADE;
-DROP TABLE IF EXISTS categories     CASCADE;
-DROP TABLE IF EXISTS users          CASCADE;
+DROP TABLE IF EXISTS recurring_transactions CASCADE;
+DROP TABLE IF EXISTS refresh_tokens          CASCADE;
+DROP TABLE IF EXISTS budgets                 CASCADE;
+DROP TABLE IF EXISTS transactions            CASCADE;
+DROP TABLE IF EXISTS wallets                 CASCADE;
+DROP TABLE IF EXISTS categories              CASCADE;
+DROP TABLE IF EXISTS users                   CASCADE;
 
 CREATE TABLE users (
   id            SERIAL PRIMARY KEY,
@@ -42,9 +44,21 @@ CREATE TABLE categories (
 );
 CREATE INDEX idx_categories_user ON categories (user_id);
 
+CREATE TABLE wallets (
+  id              SERIAL PRIMARY KEY,
+  user_id         INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name            VARCHAR(80) NOT NULL,
+  color           VARCHAR(7) DEFAULT '#3a3733',
+  initial_balance NUMERIC(12, 2) NOT NULL DEFAULT 0,
+  created_at      TIMESTAMP DEFAULT NOW(),
+  CONSTRAINT wallets_user_name_unique UNIQUE (user_id, name)
+);
+CREATE INDEX idx_wallets_user ON wallets (user_id);
+
 CREATE TABLE transactions (
   id          SERIAL PRIMARY KEY,
   user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  wallet_id   INTEGER REFERENCES wallets(id)    ON DELETE SET NULL,
   title       VARCHAR(200) NOT NULL,
   amount      NUMERIC(10, 2) NOT NULL CHECK (amount >= 0),
   type        VARCHAR(10)    NOT NULL CHECK (type IN ('income', 'expense')),
@@ -53,8 +67,10 @@ CREATE TABLE transactions (
   note        TEXT,
   created_at  TIMESTAMP DEFAULT NOW()
 );
-CREATE INDEX idx_transactions_user      ON transactions (user_id);
-CREATE INDEX idx_transactions_user_date ON transactions (user_id, date DESC);
+CREATE INDEX idx_transactions_user          ON transactions (user_id);
+CREATE INDEX idx_transactions_user_date     ON transactions (user_id, date DESC);
+CREATE INDEX idx_transactions_user_cat_date ON transactions (user_id, category_id, date);
+CREATE INDEX idx_transactions_user_wallet   ON transactions (user_id, wallet_id);
 
 CREATE TABLE budgets (
   id           SERIAL PRIMARY KEY,
@@ -65,4 +81,22 @@ CREATE TABLE budgets (
   limit_amount NUMERIC(10, 2) NOT NULL CHECK (limit_amount >= 0),
   CONSTRAINT budgets_user_cat_month_year_unique UNIQUE (user_id, category_id, month, year)
 );
-CREATE INDEX idx_budgets_user ON budgets (user_id);
+CREATE INDEX idx_budgets_user            ON budgets (user_id);
+CREATE INDEX idx_budgets_user_month_year ON budgets (user_id, month, year);
+
+CREATE TABLE recurring_transactions (
+  id            SERIAL PRIMARY KEY,
+  user_id       INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  wallet_id     INTEGER REFERENCES wallets(id)    ON DELETE SET NULL,
+  category_id   INTEGER REFERENCES categories(id) ON DELETE SET NULL,
+  title         VARCHAR(200) NOT NULL,
+  amount        NUMERIC(10, 2) NOT NULL CHECK (amount >= 0),
+  type          VARCHAR(10)    NOT NULL CHECK (type IN ('income', 'expense')),
+  frequency     VARCHAR(10)    NOT NULL CHECK (frequency IN ('weekly', 'monthly', 'yearly')),
+  next_due_date DATE NOT NULL,
+  is_active     BOOLEAN NOT NULL DEFAULT TRUE,
+  note          TEXT,
+  created_at    TIMESTAMP DEFAULT NOW()
+);
+CREATE INDEX idx_recurring_user      ON recurring_transactions (user_id);
+CREATE INDEX idx_recurring_user_due  ON recurring_transactions (user_id, next_due_date);

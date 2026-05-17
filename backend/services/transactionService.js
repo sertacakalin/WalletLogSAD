@@ -17,7 +17,14 @@ const validateUserId = (userId) => {
   return n;
 };
 
-const validatePayload = ({ title, amount, type, date, category_id, note }) => {
+const validateOptionalFk = (value, label) => {
+  if (value === undefined || value === null || value === '') return null;
+  const n = Number(value);
+  if (!Number.isInteger(n) || n <= 0) throw new ValidationError(`Invalid ${label}`);
+  return n;
+};
+
+const validatePayload = ({ title, amount, type, date, category_id, wallet_id, note }) => {
   if (typeof title !== 'string' || title.trim() === '') {
     throw new ValidationError('Title is required');
   }
@@ -34,14 +41,6 @@ const validatePayload = ({ title, amount, type, date, category_id, note }) => {
   if (!isValidISODate(date)) {
     throw new ValidationError('Date must be a valid YYYY-MM-DD value');
   }
-  let categoryId = null;
-  if (category_id !== undefined && category_id !== null && category_id !== '') {
-    const cid = Number(category_id);
-    if (!Number.isInteger(cid) || cid <= 0) {
-      throw new ValidationError('Invalid category_id');
-    }
-    categoryId = cid;
-  }
   const cleanNote = typeof note === 'string' ? note.trim() : null;
 
   return {
@@ -49,7 +48,8 @@ const validatePayload = ({ title, amount, type, date, category_id, note }) => {
     amount: numericAmount,
     type,
     date,
-    category_id: categoryId,
+    category_id: validateOptionalFk(category_id, 'category_id'),
+    wallet_id:   validateOptionalFk(wallet_id, 'wallet_id'),
     note: cleanNote,
   };
 };
@@ -64,6 +64,11 @@ const buildFilters = (raw = {}) => {
     const cid = Number(raw.category_id);
     if (!Number.isInteger(cid) || cid <= 0) throw new ValidationError('Invalid category_id filter');
     filters.category_id = cid;
+  }
+  if (raw.wallet_id) {
+    const wid = Number(raw.wallet_id);
+    if (!Number.isInteger(wid) || wid <= 0) throw new ValidationError('Invalid wallet_id filter');
+    filters.wallet_id = wid;
   }
   if (raw.startDate) {
     if (!isValidISODate(raw.startDate)) throw new ValidationError('Invalid startDate');

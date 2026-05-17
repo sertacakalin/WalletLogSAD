@@ -20,9 +20,12 @@ servers:
 
 tags:
   - name: Auth
+  - name: Dashboard
   - name: Categories
   - name: Transactions
   - name: Budgets
+  - name: Wallets
+  - name: Recurring
 
 security:
   - bearerAuth: []
@@ -380,6 +383,193 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /wallets:
+    get:
+      tags: [Wallets]
+      summary: List wallets
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Wallet' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Wallets]
+      summary: Create a wallet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/WalletInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Wallet' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /wallets/balances:
+    get:
+      tags: [Wallets]
+      summary: List wallets with computed balances
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/WalletBalance' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /wallets/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: integer } }
+    get:
+      tags: [Wallets]
+      summary: Get a wallet by id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Wallet' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Wallets]
+      summary: Update a wallet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/WalletInput' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Wallet' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Wallets]
+      summary: Delete a wallet
+      responses:
+        '204': { description: Deleted }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /recurring:
+    get:
+      tags: [Recurring]
+      summary: List recurring transactions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Recurring' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Recurring]
+      summary: Create a recurring transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RecurringInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Recurring' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /recurring/upcoming:
+    get:
+      tags: [Recurring]
+      summary: Upcoming recurring payments (next N due dates)
+      parameters:
+        - { name: limit, in: query, schema: { type: integer, default: 5 } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/UpcomingPayment' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /recurring/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: integer } }
+    get:
+      tags: [Recurring]
+      summary: Get a recurring transaction by id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Recurring' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Recurring]
+      summary: Update a recurring transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RecurringInput' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Recurring' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Recurring]
+      summary: Delete a recurring transaction
+      responses:
+        '204': { description: Deleted }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /recurring/{id}/roll:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: integer } }
+    post:
+      tags: [Recurring]
+      summary: Advance next_due_date by one frequency period
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Recurring' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /dashboard:
+    get:
+      tags: [Dashboard]
+      summary: Aggregated dashboard payload (balance, summary, charts, insights, recent)
+      parameters:
+        - { name: month, in: query, schema: { type: integer, minimum: 1, maximum: 12 } }
+        - { name: year,  in: query, schema: { type: integer } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Dashboard' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
 components:
   securitySchemes:
     bearerAuth:
@@ -533,3 +723,115 @@ components:
         spent:       { type: number,  example: 320 }
         remaining:   { type: number,  example: 180 }
         exceeded:    { type: boolean, example: false }
+
+    Wallet:
+      type: object
+      properties:
+        id:              { type: integer }
+        user_id:         { type: integer }
+        name:            { type: string,  example: "Cash" }
+        color:           { type: string,  example: "#3a3733" }
+        initial_balance: { type: number,  example: 0 }
+        created_at:      { type: string,  format: date-time }
+
+    WalletInput:
+      type: object
+      required: [name]
+      properties:
+        name:            { type: string,  maxLength: 80 }
+        color:           { type: string,  pattern: "^#[0-9a-fA-F]{6}$" }
+        initial_balance: { type: number }
+
+    WalletBalance:
+      type: object
+      properties:
+        id:              { type: integer }
+        name:            { type: string }
+        color:           { type: string }
+        initial_balance: { type: number }
+        income:          { type: number }
+        expense:         { type: number }
+        balance:         { type: number, description: "initial_balance + income - expense" }
+
+    Recurring:
+      type: object
+      properties:
+        id:            { type: integer }
+        user_id:       { type: integer }
+        wallet_id:     { type: integer, nullable: true }
+        category_id:   { type: integer, nullable: true }
+        title:         { type: string }
+        amount:        { type: number }
+        type:          { type: string, enum: [income, expense] }
+        frequency:     { type: string, enum: [weekly, monthly, yearly] }
+        next_due_date: { type: string, format: date }
+        is_active:     { type: boolean }
+        note:          { type: string, nullable: true }
+        created_at:    { type: string, format: date-time }
+
+    RecurringInput:
+      type: object
+      required: [title, amount, type, frequency, next_due_date]
+      properties:
+        title:         { type: string,  maxLength: 200 }
+        amount:        { type: number,  minimum: 0.01 }
+        type:          { type: string,  enum: [income, expense] }
+        frequency:     { type: string,  enum: [weekly, monthly, yearly] }
+        next_due_date: { type: string,  format: date }
+        category_id:   { type: integer, nullable: true }
+        wallet_id:     { type: integer, nullable: true }
+        note:          { type: string,  nullable: true }
+        is_active:     { type: boolean, default: true }
+
+    UpcomingPayment:
+      type: object
+      properties:
+        id:            { type: integer }
+        title:         { type: string }
+        amount:        { type: number }
+        type:          { type: string }
+        frequency:     { type: string }
+        next_due_date: { type: string, format: date }
+        days_until:    { type: integer, description: "negative if overdue" }
+        status:        { type: string, enum: [overdue, due_soon, upcoming] }
+        category:      { type: string, nullable: true }
+        wallet:        { type: string, nullable: true }
+
+    Insight:
+      type: object
+      properties:
+        level:   { type: string, enum: [warning, info, positive] }
+        message: { type: string }
+
+    Dashboard:
+      type: object
+      properties:
+        month:          { type: integer }
+        year:           { type: integer }
+        balance:        { type: number, example: 18450 }
+        monthlyIncome:  { type: number, example: 42000 }
+        monthlyExpense: { type: number, example: 23550 }
+        savingsRate:    { type: integer, example: 43 }
+        insights:       { type: array, items: { $ref: '#/components/schemas/Insight' } }
+        categoryExpenses:
+          type: array
+          items:
+            type: object
+            properties:
+              category_id: { type: integer, nullable: true }
+              category:    { type: string }
+              color:       { type: string }
+              total:       { type: number }
+        monthlyTrend:
+          type: array
+          items:
+            type: object
+            properties:
+              period: { type: string, example: "2026-05" }
+              year:   { type: integer }
+              month:  { type: integer }
+              total:  { type: number }
+        budgets:            { type: array, items: { $ref: '#/components/schemas/BudgetStatus' } }
+        upcomingPayments:   { type: array, items: { $ref: '#/components/schemas/UpcomingPayment' } }
+        recentTransactions: { type: array, items: { $ref: '#/components/schemas/Transaction' } }
+        wallets:            { type: array, items: { $ref: '#/components/schemas/WalletBalance' } }
