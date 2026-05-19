@@ -150,12 +150,3 @@ walletlog/
 │   └── app.js        fetch + auto-refresh + render
 └── .github/workflows/ci.yml
 ```
-
-## Sonraki İterasyonlar (planlanmadı, mimari yolu kapamıyor)
-
-- CSV import / export
-- Receipt foto yükleme + OCR
-- Bütçe rollover (kalan limiti bir sonraki aya devret)
-- OAuth (Google) login
-- Çiftler için paylaşımlı bütçe
-- "Ayımı paylaş" expirable read-only link
