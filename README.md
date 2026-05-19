@@ -1,39 +1,33 @@
 # WalletLog
 
-Personal expense tracker. Users register an account, record income/expense
-transactions, group them by category, manage wallets, and set monthly
-budgets. Built for the **System Analysis & Design** course (Spring 2026).
+Kişisel gelir-gider takip uygulaması. Kullanıcı kayıt olur, gelir/gider
+işlemlerini kategorilere göre kaydeder, cüzdan bazında bakiyesini görür ve
+aylık kategori bazlı bütçe belirler. **System Analysis & Design** dersi
+(Bahar 2026) için.
 
-## Tech
+## Tech Stack
 
-- **Frontend** — Vanilla JavaScript SPA (no framework)
+- **Frontend** — Vanilla JavaScript SPA
 - **Backend** — Node.js + Express
 - **Database** — PostgreSQL
-- **Auth** — JWT (HS256) + rotating refresh tokens
-- **Docs** — Swagger UI at `/api-docs`
-- **Tests** — Jest (service layer)
+- **Auth** — JWT + refresh token
+- **API Docs** — Swagger UI
+- **Tests** — Jest
 
-## Layout
+## Özellikler
 
-```
-walletlog/
-├── backend/
-│   ├── routes/       HTTP handlers (no business logic)
-│   ├── services/     business logic + validation (tested)
-│   ├── models/       parameterized SQL
-│   ├── middleware/   auth, error handler, rate limit
-│   ├── tests/        Jest unit tests
-│   ├── index.js      Express app
-│   ├── swagger.yaml  OpenAPI 3.0 spec
-│   └── schema.sql    database schema
-└── frontend/         index.html + styles.css + app.js
-```
+- Kayıt / giriş (JWT, her kullanıcı sadece kendi verisini görür)
+- Kategori CRUD
+- Cüzdan (wallet) CRUD ve bakiye hesabı
+- Gelir/gider işlemi CRUD, tarih ve kategori filtreleme
+- Aylık özet (gelir / gider / fark)
+- Aylık kategori bütçesi ve aşım uyarısı
+- Yinelenen işlemler (haftalık / aylık / yıllık)
+- Dashboard: aylık trend, en çok harcanan kategoriler, yaklaşan ödemeler
 
-Routes → services → models → db. Every protected query is scoped by `user_id`.
+## Kurulum
 
-## Setup
-
-Requires Node 18+ and PostgreSQL 14+.
+Node.js 18+ ve PostgreSQL 14+ gerekli.
 
 ```bash
 git clone https://github.com/sertacakalin/WalletLogSAD.git walletlog
@@ -42,55 +36,52 @@ npm install
 cp .env.example .env
 ```
 
-Generate a JWT secret and paste it into `.env` as `JWT_ACCESS_SECRET`:
+`.env` içine bir JWT secret yaz:
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-Create the database:
+Veritabanını oluştur:
 
 ```bash
 psql -U postgres -c "CREATE DATABASE walletlog;"
 psql -U postgres -d walletlog -f schema.sql
 ```
 
-Run:
+Çalıştır:
 
 ```bash
 npm run dev
 ```
 
-Open `http://localhost:3000` — login screen, then the dashboard.
+`http://localhost:3000` — login ekranı, sonra dashboard.
 
 ## API
 
-Interactive docs: **`http://localhost:3000/api-docs`**
+İnteraktif dokümantasyon: **`http://localhost:3000/api-docs`**
 
-| Method | Path | Auth |
+| Method | Path | Açıklama |
 |---|---|---|
-| POST | `/api/auth/register` | — |
-| POST | `/api/auth/login` | — |
-| POST | `/api/auth/refresh` | cookie |
-| POST | `/api/auth/logout` | cookie |
-| GET | `/api/auth/me` | Bearer |
-| CRUD | `/api/categories` | Bearer |
-| CRUD | `/api/transactions` (+ `/summary`) | Bearer |
-| CRUD | `/api/budgets` (+ `/status`) | Bearer |
-| CRUD | `/api/wallets` | Bearer |
-| CRUD | `/api/recurring` | Bearer |
-| GET | `/api/dashboard` | Bearer |
+| POST | `/api/auth/register` | Hesap aç |
+| POST | `/api/auth/login` | Giriş yap |
+| POST | `/api/auth/logout` | Çıkış yap |
+| CRUD | `/api/categories` | Kategoriler |
+| CRUD | `/api/transactions` | İşlemler |
+| CRUD | `/api/budgets` | Bütçeler |
+| CRUD | `/api/wallets` | Cüzdanlar |
+| CRUD | `/api/recurring` | Yinelenen işlemler |
+| GET | `/api/dashboard` | Aylık özet ekranı |
 
-Protected endpoints expect `Authorization: Bearer <accessToken>`.
-In Swagger UI: login, copy `accessToken`, click **Authorize**, paste.
+Korunan endpoint'ler `Authorization: Bearer <accessToken>` ister.
 
-## Tests
+## Testler
 
 ```bash
 npm test
 ```
 
-156 Jest tests on the service layer. Models are mocked, no DB needed.
+156 Jest unit testi (service katmanı).
 
 ## Lint
 
@@ -98,16 +89,26 @@ npm test
 npm run lint
 ```
 
-ESLint runs on every push via GitHub Actions (`.github/workflows/ci.yml`).
+ESLint her push'ta GitHub Actions üzerinden çalışır.
 
-## Notes
+## Yapı
 
-- **Do not place this project inside `~/Desktop` or `~/Documents`** — those
-  are iCloud-synced on macOS and `node_modules` files get evicted, which
-  makes `node`/`jest` hang silently. Keep it at `~/walletlog`.
-- Rate limit on `/api/auth/*`: 10 req/min/IP.
-- The server fails to boot if `JWT_ACCESS_SECRET` is missing or shorter
-  than 16 characters.
+```
+walletlog/
+├── backend/
+│   ├── routes/       HTTP handler (business logic yok)
+│   ├── services/     business logic + validation (test'li)
+│   ├── models/       parametrik SQL
+│   ├── middleware/   auth, error handler, rate limit
+│   ├── tests/        Jest unit testler
+│   ├── index.js      Express app
+│   ├── swagger.yaml  OpenAPI 3.0
+│   └── schema.sql    veritabanı şeması
+└── frontend/         index.html + styles.css + app.js
+```
+
+Katmanlama: routes → services → models → db. Her sorgu `user_id` ile
+filtrelenir, kullanıcılar birbirinin verisini göremez.
 
 ## License
 
