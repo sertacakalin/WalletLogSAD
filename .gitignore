@@ -25,9 +25,3 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
-
-# local-only docs (not shipped to GitHub)
-CLAUDE.md
-AUTH_DESIGN.md
-STATUS.md
-NEXT_STEPS.md
