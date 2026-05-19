@@ -1,4 +1,6 @@
 const recurringModel = require('../models/recurringModel');
+const categoryModel  = require('../models/categoryModel');
+const walletModel    = require('../models/walletModel');
 const { ValidationError, NotFoundError } = require('../errors');
 const { isValidISODate, advanceDate } = require('../utils/dates');
 
@@ -61,6 +63,19 @@ const validatePayload = ({
   };
 };
 
+// See transactionService.assertFkOwnership for the rationale — keeps multi-tenant
+// isolation tight even when DB-level FK only checks row existence.
+const assertFkOwnership = async (uid, { category_id, wallet_id }) => {
+  if (category_id !== null && category_id !== undefined) {
+    const owned = await categoryModel.getById(category_id, uid);
+    if (!owned) throw new ValidationError('Invalid category_id');
+  }
+  if (wallet_id !== null && wallet_id !== undefined) {
+    const owned = await walletModel.getById(wallet_id, uid);
+    if (!owned) throw new ValidationError('Invalid wallet_id');
+  }
+};
+
 const getAllRecurring = async (userId) => {
   const uid = validateUserId(userId);
   return recurringModel.getAll(uid);
@@ -83,6 +98,7 @@ const getUpcoming = async (userId, limit) => {
 const createRecurring = async (userId, raw) => {
   const uid = validateUserId(userId);
   const clean = validatePayload(raw);
+  await assertFkOwnership(uid, clean);
   return recurringModel.create(uid, clean);
 };
 
@@ -91,6 +107,7 @@ const updateRecurring = async (id, userId, raw) => {
   const rid = validateId(id);
   await getRecurringById(rid, uid);
   const clean = validatePayload(raw);
+  await assertFkOwnership(uid, clean);
   return recurringModel.update(rid, uid, clean);
 };
 

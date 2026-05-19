@@ -9,9 +9,26 @@ jest.mock('../models/transactionModel', () => ({
   remove:  jest.fn(),
 }));
 
-const model = require('../models/transactionModel');
+jest.mock('../models/categoryModel', () => ({
+  getById: jest.fn(),
+}));
+
+jest.mock('../models/walletModel', () => ({
+  getById: jest.fn(),
+}));
+
+const model         = require('../models/transactionModel');
+const categoryModel = require('../models/categoryModel');
+const walletModel   = require('../models/walletModel');
 
 const USER_ID = 1;
+
+beforeEach(() => {
+  // Default: every referenced FK is owned by the current user.
+  // Tests that need to simulate a foreign FK override these with mockResolvedValueOnce(undefined).
+  categoryModel.getById.mockResolvedValue({ id: 1, user_id: USER_ID });
+  walletModel.getById.mockResolvedValue({ id: 1, user_id: USER_ID });
+});
 
 const validPayload = {
   title: 'Market shopping',
@@ -84,6 +101,41 @@ describe('transactionService — validation', () => {
   test('rejects invalid user', async () => {
     await expect(service.createTransaction(0, validPayload))
       .rejects.toBeInstanceOf(ValidationError);
+  });
+});
+
+describe('transactionService — multi-tenant isolation', () => {
+  afterEach(() => jest.clearAllMocks());
+
+  test('create rejects category_id owned by another user', async () => {
+    categoryModel.getById.mockResolvedValueOnce(undefined);
+    await expect(service.createTransaction(USER_ID, { ...validPayload, category_id: 999 }))
+      .rejects.toThrow(/Invalid category_id/);
+    expect(categoryModel.getById).toHaveBeenCalledWith(999, USER_ID);
+    expect(model.create).not.toHaveBeenCalled();
+  });
+
+  test('create rejects wallet_id owned by another user', async () => {
+    walletModel.getById.mockResolvedValueOnce(undefined);
+    await expect(service.createTransaction(USER_ID, { ...validPayload, wallet_id: 888 }))
+      .rejects.toThrow(/Invalid wallet_id/);
+    expect(walletModel.getById).toHaveBeenCalledWith(888, USER_ID);
+    expect(model.create).not.toHaveBeenCalled();
+  });
+
+  test('update rejects category_id owned by another user', async () => {
+    model.getById.mockResolvedValue({ id: 7, user_id: USER_ID });
+    categoryModel.getById.mockResolvedValueOnce(undefined);
+    await expect(service.updateTransaction(7, USER_ID, { ...validPayload, category_id: 999 }))
+      .rejects.toThrow(/Invalid category_id/);
+    expect(model.update).not.toHaveBeenCalled();
+  });
+
+  test('create skips ownership check when category_id is null', async () => {
+    model.create.mockResolvedValue({ id: 1 });
+    await service.createTransaction(USER_ID, { ...validPayload, category_id: null, wallet_id: null });
+    expect(categoryModel.getById).not.toHaveBeenCalled();
+    expect(walletModel.getById).not.toHaveBeenCalled();
   });
 });
 

@@ -1,4 +1,6 @@
 const transactionModel = require('../models/transactionModel');
+const categoryModel    = require('../models/categoryModel');
+const walletModel      = require('../models/walletModel');
 const { ValidationError, NotFoundError } = require('../errors');
 const { monthRange, isValidISODate } = require('../utils/dates');
 
@@ -81,6 +83,20 @@ const buildFilters = (raw = {}) => {
   return filters;
 };
 
+// Verifies that a referenced category/wallet (if any) belongs to the same user.
+// Without this, a user can attach their record to another user's category_id
+// (FK only checks existence, not ownership) — leaks the other user's name on JOIN.
+const assertFkOwnership = async (uid, { category_id, wallet_id }) => {
+  if (category_id !== null && category_id !== undefined) {
+    const owned = await categoryModel.getById(category_id, uid);
+    if (!owned) throw new ValidationError('Invalid category_id');
+  }
+  if (wallet_id !== null && wallet_id !== undefined) {
+    const owned = await walletModel.getById(wallet_id, uid);
+    if (!owned) throw new ValidationError('Invalid wallet_id');
+  }
+};
+
 const getAllTransactions = async (userId, rawFilters) => {
   const uid = validateUserId(userId);
   const filters = buildFilters(rawFilters);
@@ -98,6 +114,7 @@ const getTransactionById = async (id, userId) => {
 const createTransaction = async (userId, data) => {
   const uid = validateUserId(userId);
   const clean = validatePayload(data);
+  await assertFkOwnership(uid, clean);
   return transactionModel.create(uid, clean);
 };
 
@@ -106,6 +123,7 @@ const updateTransaction = async (id, userId, data) => {
   const numericId = validateId(id);
   const clean = validatePayload(data);
   await getTransactionById(numericId, uid);
+  await assertFkOwnership(uid, clean);
   return transactionModel.update(numericId, uid, clean);
 };
 

@@ -1,5 +1,6 @@
 const budgetModel = require('../models/budgetModel');
 const transactionModel = require('../models/transactionModel');
+const categoryModel = require('../models/categoryModel');
 const { ValidationError, NotFoundError } = require('../errors');
 const { monthRange, isValidMonth, isValidYear } = require('../utils/dates');
 
@@ -56,6 +57,10 @@ const getBudgetById = async (id, userId) => {
 const createBudget = async (userId, raw) => {
   const uid = validateUserId(userId);
   const clean = validateCreatePayload(raw);
+  // Block budgets that reference another user's category — would leak the
+  // foreign category name through the JOIN in budgetModel.getAll.
+  const owned = await categoryModel.getById(clean.category_id, uid);
+  if (!owned) throw new ValidationError('Invalid category_id');
   return budgetModel.create(uid, clean);
 };
 

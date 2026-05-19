@@ -7,9 +7,26 @@ jest.mock('../models/recurringModel', () => ({
   remove: jest.fn(),
 }));
 
+jest.mock('../models/categoryModel', () => ({
+  getById: jest.fn(),
+}));
+
+jest.mock('../models/walletModel', () => ({
+  getById: jest.fn(),
+}));
+
 const recurringModel = require('../models/recurringModel');
+const categoryModel  = require('../models/categoryModel');
+const walletModel    = require('../models/walletModel');
 const service = require('../services/recurringService');
 const { ValidationError, NotFoundError } = require('../errors');
+
+beforeEach(() => {
+  // Default: any referenced FK is owned by the current user.
+  // Tests that need a foreign FK override with mockResolvedValueOnce(undefined).
+  categoryModel.getById.mockResolvedValue({ id: 1, user_id: 1 });
+  walletModel.getById.mockResolvedValue({ id: 1, user_id: 1 });
+});
 
 afterEach(() => jest.clearAllMocks());
 
@@ -64,6 +81,30 @@ describe('recurringService.createRecurring — validation', () => {
     const result = await service.createRecurring(1, validPayload({ category_id: '', wallet_id: '' }));
     expect(result.category_id).toBeNull();
     expect(result.wallet_id).toBeNull();
+  });
+});
+
+describe('recurringService — multi-tenant isolation', () => {
+  test('create rejects category_id owned by another user', async () => {
+    categoryModel.getById.mockResolvedValueOnce(undefined);
+    await expect(service.createRecurring(1, validPayload({ category_id: 999 })))
+      .rejects.toThrow(/Invalid category_id/);
+    expect(recurringModel.create).not.toHaveBeenCalled();
+  });
+
+  test('create rejects wallet_id owned by another user', async () => {
+    walletModel.getById.mockResolvedValueOnce(undefined);
+    await expect(service.createRecurring(1, validPayload({ wallet_id: 888 })))
+      .rejects.toThrow(/Invalid wallet_id/);
+    expect(recurringModel.create).not.toHaveBeenCalled();
+  });
+
+  test('update rejects category_id owned by another user', async () => {
+    recurringModel.getById.mockResolvedValue({ id: 7, user_id: 1 });
+    categoryModel.getById.mockResolvedValueOnce(undefined);
+    await expect(service.updateRecurring(7, 1, validPayload({ category_id: 999 })))
+      .rejects.toThrow(/Invalid category_id/);
+    expect(recurringModel.update).not.toHaveBeenCalled();
   });
 });
 

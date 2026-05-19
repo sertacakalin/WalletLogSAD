@@ -13,11 +13,21 @@ jest.mock('../models/transactionModel', () => ({
   getAll: jest.fn(),
 }));
 
+jest.mock('../models/categoryModel', () => ({
+  getById: jest.fn(),
+}));
+
 const budgetModel      = require('../models/budgetModel');
 const transactionModel = require('../models/transactionModel');
+const categoryModel    = require('../models/categoryModel');
 
 const USER_ID = 1;
 const validPayload = { category_id: 1, month: 5, year: 2026, limit_amount: 500 };
+
+beforeEach(() => {
+  // Default: referenced category is owned by the current user.
+  categoryModel.getById.mockResolvedValue({ id: 1, user_id: USER_ID });
+});
 
 describe('budgetService — create', () => {
   afterEach(() => jest.clearAllMocks());
@@ -57,6 +67,25 @@ describe('budgetService — create', () => {
   test('rejects invalid user', async () => {
     await expect(service.createBudget(0, validPayload))
       .rejects.toBeInstanceOf(ValidationError);
+  });
+});
+
+describe('budgetService — multi-tenant isolation', () => {
+  afterEach(() => jest.clearAllMocks());
+
+  test('create rejects category_id owned by another user', async () => {
+    categoryModel.getById.mockResolvedValueOnce(undefined);
+    await expect(service.createBudget(USER_ID, { ...validPayload, category_id: 999 }))
+      .rejects.toThrow(/Invalid category_id/);
+    expect(categoryModel.getById).toHaveBeenCalledWith(999, USER_ID);
+    expect(budgetModel.create).not.toHaveBeenCalled();
+  });
+
+  test('create succeeds when category belongs to the same user', async () => {
+    categoryModel.getById.mockResolvedValueOnce({ id: 5, user_id: USER_ID });
+    budgetModel.create.mockResolvedValue({ id: 10 });
+    await service.createBudget(USER_ID, { ...validPayload, category_id: 5 });
+    expect(budgetModel.create).toHaveBeenCalledWith(USER_ID, expect.objectContaining({ category_id: 5 }));
   });
 });
 
