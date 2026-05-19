@@ -730,10 +730,7 @@
       // 4. Budget tracking (reuse bar component)
       renderBudgets(d.budgets || []);
 
-      // 5. Upcoming payments
-      renderUpcoming(d.upcomingPayments || []);
-
-      // 6. Recent transactions
+      // 5. Recent transactions
       renderRecent(d.recentTransactions || []);
     } catch (e) {
       toast(e.message, 'error');
@@ -881,33 +878,6 @@
       <path d="${path}" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
       ${dots}
       ${labels}`;
-  }
-
-  /* --- Upcoming list --- */
-  function renderUpcoming(rows) {
-    const ul = $('upcoming-list');
-    if (!rows.length) {
-      ul.innerHTML = '<li class="muted">No upcoming payments. Add a recurring transaction to see them here.</li>';
-      return;
-    }
-    ul.innerHTML = rows.map((p) => {
-      const dueLabel = p.status === 'overdue'
-        ? `Overdue by ${Math.abs(p.days_until)}d`
-        : p.days_until === 0 ? 'Due today'
-        : p.days_until === 1 ? 'Due tomorrow'
-        : `Due in ${p.days_until}d`;
-      return `
-        <li class="upcoming-row" data-status="${escapeHtml(p.status)}">
-          <div class="upcoming-row__main">
-            <span class="upcoming-row__title">${escapeHtml(p.title)}</span>
-            <span class="upcoming-row__meta">
-              ${escapeHtml(p.category || 'Uncategorized')} &middot; ${escapeHtml(p.frequency)}
-            </span>
-          </div>
-          <div class="upcoming-row__amount ${escapeHtml(p.type)}">${p.type === 'expense' ? '−' : '+'}${fmtMoney(p.amount)}</div>
-          <div class="upcoming-row__when" data-status="${escapeHtml(p.status)}">${escapeHtml(dueLabel)}</div>
-        </li>`;
-    }).join('');
   }
 
   /* --- Recent transactions --- */

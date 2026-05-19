@@ -804,44 +804,6 @@ tbody tr:hover { background: var(--paper-soft); }
 }
 .budget-row__over { color: var(--accent); font-weight: 700; }
 
-/* ============================================================ UPCOMING */
-
-.upcoming-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-}
-.upcoming-row {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  gap: 1rem;
-  align-items: center;
-  padding: 0.65rem 0;
-  border-bottom: 1px solid var(--rule-soft);
-}
-.upcoming-row:last-child { border-bottom: none; }
-.upcoming-row__main { display: flex; flex-direction: column; min-width: 0; }
-.upcoming-row__title { font-weight: 600; color: var(--ink); }
-.upcoming-row__meta { font-size: 0.78rem; color: var(--muted); font-family: var(--mono); }
-.upcoming-row__amount {
-  font-family: var(--mono);
-  font-feature-settings: "tnum";
-  font-weight: 700;
-}
-.upcoming-row__amount.income  { color: var(--positive); }
-.upcoming-row__amount.expense { color: var(--accent); }
-.upcoming-row__when {
-  font-family: var(--mono);
-  font-size: 0.78rem;
-  padding: 0.2rem 0.5rem;
-  border: 1px solid var(--rule-soft);
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-.upcoming-row__when[data-status="overdue"]  { color: var(--accent); border-color: var(--accent); font-weight: 700; }
-.upcoming-row__when[data-status="due_soon"] { color: #8a6d1a; border-color: #c2a44b; font-weight: 700; }
-
 /* ============================================================ RECENT */
 
 .recent-list {
@@ -923,5 +885,5 @@ td.num, th.num { text-align: right; font-family: var(--mono); font-feature-setti
   .dash-header { flex-direction: column; align-items: stretch; }
   .dash-quick-actions { justify-content: stretch; }
   .btn-quick { flex: 1; min-width: max-content; }
-  .upcoming-row, .recent-row { grid-template-columns: 1fr; gap: 0.25rem; }
+  .recent-row { grid-template-columns: 1fr; gap: 0.25rem; }
 }
