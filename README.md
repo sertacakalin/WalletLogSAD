@@ -2,7 +2,7 @@
 
 Kişisel gelir-gider takip uygulaması. Kullanıcı kayıt olur, işlemlerini cüzdan
 ve kategori bazında kaydeder, aylık bütçe koyar, dashboard'dan trendlerini
-görür. **System Analysis & Design** dersi (Bahar 2026) projesi.
+görür.
 
 - 156 unit test (Jest)
 - GitHub Actions CI (lint + test)
