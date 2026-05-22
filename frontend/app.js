@@ -225,16 +225,16 @@
     }
     if (!ok) return;
     try {
-      const result = await auth.register({
+      await auth.register({
         email: email.trim(),
         password: pw,
         displayName: display ? display.trim() : undefined,
       });
-      setAccessToken(result.accessToken);
-      currentUser = result.user;
+      // Otomatik giriş yapma — kullanıcıyı boş login ekranına yönlendir.
       $('register-form').reset();
-      toast(`Account created — welcome ${currentUser.email}`);
-      showAppShell();
+      activateTab('login');
+      $('login-form').reset();
+      toast('Account created successfully! Please log in.');
     } catch (err) {
       toast(err.message || 'Registration failed', 'error');
     }
